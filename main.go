@@ -2,16 +2,19 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"strings"
+	"encoding/json"
 )
 
 func main() {
 	fileContent := getInputFileContent()
 	stopOnError, formatTypesToPrettify := getFlags()
 	prettyContent := prettifyContent(fileContent, stopOnError, formatTypesToPrettify)
-	fmt.Println(prettyContent)
+	fmt.Println(string(prettyContent))
 }
-func prettifyContent(content string, stopOnError bool, formatTypesToPrettify string) string {
+func prettifyContent(content []byte, stopOnError bool, formatTypesToPrettify string) []byte {
 	if strings.Contains(formatTypesToPrettify, "xml") {
 		content = parseXml(content)
 	}
@@ -21,15 +24,24 @@ func prettifyContent(content string, stopOnError bool, formatTypesToPrettify str
 	return content
 }
 func getFlags() (bool, string) {
-
 	return false, "json,xml"
 }
-func getInputFileContent() string {
-	return ""
+func getInputFileContent() []byte {
+	data, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		fmt.Println("No input file!")
+	}
+	return data
 }
-func parseJson(content string) string {
-	return content
+func parseJson(content []byte) []byte {
+	var obj interface{}
+	json.Unmarshal(content, &obj)
+	data, err := json.MarshalIndent(obj, "", "  ")
+	if err != nil {
+		fmt.Println("Bad json!")
+	}
+	return data
 }
-func parseXml(content string) string {
+func parseXml(content []byte) []byte {
 	return content
 }
