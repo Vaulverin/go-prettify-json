@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"encoding/json"
+	"bytes"
 )
 
 func main() {
@@ -34,13 +35,9 @@ func getInputFileContent() []byte {
 	return data
 }
 func parseJson(content []byte) []byte {
-	var obj interface{}
-	json.Unmarshal(content, &obj)
-	data, err := json.MarshalIndent(obj, "", "  ")
-	if err != nil {
-		fmt.Println("Bad json!")
-	}
-	return data
+	var data bytes.Buffer
+	json.Indent(&data, content, "", "  ")
+	return data.Bytes()
 }
 func parseXml(content []byte) []byte {
 	return content
