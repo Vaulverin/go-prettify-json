@@ -12,7 +12,7 @@ import (
 
 var (
 	jsonBegin = []byte{'{', '['}
-	jsonEnd   = []byte{'}', '['}
+	jsonEnd   = []byte{'}', ']'}
 )
 
 func main() {
@@ -38,7 +38,8 @@ func getFlags() (bool, string) {
 func getInputFileContent() ( []byte, error ){
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := ioutil.ReadAll(os.Stdin)
+		data, err := ioutil.ReadFile("C:/go-path/src/go-prettify-json-xml/t.txt")
+		//data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}
@@ -56,21 +57,23 @@ func prettifyJson(content []byte) []byte {
 		}
 		if beginIndex != -1 {
 			endIndex := findJsonEnd( content[ beginIndex :])
-			fmt.Println(beginIndex)
-			fmt.Println(endIndex)
 			if endIndex != -1 {
-				endIndex := beginIndex + endIndex + 1
-				jsonData := parseJson( content[ beginIndex : endIndex ])
+				length := beginIndex + endIndex + 1
+				jsonData := parseJson( content[ beginIndex : length ] )
 				if len(jsonData) != 0 {
 					newLine := []byte{'\r', '\n'}
 					jsonData = append(newLine, jsonData...)
 					jsonData = append(jsonData, newLine...)
 					newContent := append(content[: beginIndex ], jsonData...)
-					content = append(newContent, content[ endIndex + 1 : ]...)
+					tailBeginIndex := beginIndex + endIndex + 1
+					if tailBeginIndex >= len(content) {
+						content = newContent
+					} else {
+						content = append(newContent, content[ tailBeginIndex : ]...)
+					}
 					i = beginIndex + len(jsonData) - 1
 				}
 			}
-			return content
 		}
 	}
 	return content
@@ -87,17 +90,16 @@ func findJsonEnd(content []byte) int {
 	if signIndex != -1 {
 		beginsCount := 0
 		for i, symbol := range content {
-			fmt.Println(beginsCount)
 			switch symbol {
 			case jsonBegin[ signIndex ]:
 				beginsCount++
 			case jsonEnd[ signIndex ]:
 				beginsCount--
-				if beginsCount == 0 {
-					return i
-				} else if beginsCount < 0 {
-					return -1
-				}
+			}
+			if beginsCount == 0 {
+				return i
+			} else if beginsCount < 0 {
+				break
 			}
 		}
 	}
