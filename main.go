@@ -38,8 +38,8 @@ func getFlags() (bool, string) {
 func getInputFileContent() ( []byte, error ){
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := ioutil.ReadFile("C:/go-path/src/go-prettify-json-xml/t.txt")
-		//data, err := ioutil.ReadAll(os.Stdin)
+		//data, err := ioutil.ReadFile("C:/go-path/src/go-prettify-json-xml/t.txt")
+		data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}
