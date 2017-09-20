@@ -1,111 +1,71 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"errors"
-)
-
-var (
-	jsonBegin = []byte{'{', '['}
-	jsonEnd   = []byte{'}', ']'}
+	"go-prettify-json-xml/jsonParser"
 )
 
 func main() {
 	fileContent, err := getInputFileContent()
 	if err == nil {
-		stopOnError, formatTypesToPrettify := getFlags()
-		prettyContent := prettifyContent(fileContent, stopOnError, formatTypesToPrettify)
+		var prettyContent []byte
+		parsers := getFlags()
+		for _, parser := range parsers {
+			prettyContent = prettifyContent(fileContent, parser)
+		}
 		fmt.Println(string(prettyContent))
 	}
 }
-func prettifyContent(content []byte, stopOnError bool, formatTypesToPrettify string) []byte {
-	if strings.Contains(formatTypesToPrettify, "xml") {
 
-	}
-	if strings.Contains(formatTypesToPrettify, "json") {
-		content = prettifyJson(content)
-	}
-	return content
+type iParser interface {
+	FindBeginIndex(content []byte) int
+	FindEndIndex(content []byte) int
+	Parse(content []byte) []byte
 }
-func getFlags() (bool, string) {
-	return false, "json,xml"
+
+func getFlags() []iParser {
+	return []iParser{jsonParser.Parser{}}
 }
+
 func getInputFileContent() ( []byte, error ){
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		//data, err := ioutil.ReadFile("C:/go-path/src/go-prettify-json-xml/t.txt")
-		data, err := ioutil.ReadAll(os.Stdin)
+		data, err := ioutil.ReadFile("C:/go-path/src/go-prettify-json-xml/t.txt")
+		//data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}
 		return data, nil
 	}
-	return nil, errors.New("No input file")
+	return nil, errors.New("No input file.")
 }
 
-func prettifyJson(content []byte) []byte {
+func prettifyContent(content []byte, parser iParser) []byte {
 	for i := 0; i < len(content); i++ {
-		beginIndex := bytes.IndexByte(content[i:], jsonBegin[0])
-		tempIndex := bytes.IndexByte(content[i:], jsonBegin[1])
-		if beginIndex > tempIndex && tempIndex != -1 {
-			beginIndex = tempIndex
-		}
+		beginIndex := parser.FindBeginIndex( content[i:] )
 		if beginIndex != -1 {
-			endIndex := findJsonEnd( content[ beginIndex :])
+			endIndex := parser.FindEndIndex( content[ beginIndex :] )
 			if endIndex != -1 {
 				length := beginIndex + endIndex + 1
-				jsonData := parseJson( content[ beginIndex : length ] )
-				if len(jsonData) != 0 {
+				data := parser.Parse( content[ beginIndex : length ] )
+				if len(data) != 0 {
 					newLine := []byte{'\r', '\n'}
-					jsonData = append(newLine, jsonData...)
-					jsonData = append(jsonData, newLine...)
-					newContent := append(content[: beginIndex ], jsonData...)
+					data = append(newLine, data...)
+					data = append(data, newLine...)
+					newContent := append(content[: beginIndex ], data...)
 					tailBeginIndex := beginIndex + endIndex + 1
 					if tailBeginIndex >= len(content) {
 						content = newContent
 					} else {
 						content = append(newContent, content[ tailBeginIndex : ]...)
 					}
-					i = beginIndex + len(jsonData) - 1
+					i = beginIndex + len(data) - 1
 				}
 			}
 		}
 	}
-	return content
-}
-
-func parseJson(content []byte) []byte {
-	var data bytes.Buffer
-	json.Indent(&data, content, "", "  ")
-	return data.Bytes()
-}
-
-func findJsonEnd(content []byte) int {
-	signIndex := bytes.IndexByte(jsonBegin, content[0])
-	if signIndex != -1 {
-		beginsCount := 0
-		for i, symbol := range content {
-			switch symbol {
-			case jsonBegin[ signIndex ]:
-				beginsCount++
-			case jsonEnd[ signIndex ]:
-				beginsCount--
-			}
-			if beginsCount == 0 {
-				return i
-			} else if beginsCount < 0 {
-				break
-			}
-		}
-	}
-	return -1
-}
-
-func parseXml(content []byte) []byte {
 	return content
 }
