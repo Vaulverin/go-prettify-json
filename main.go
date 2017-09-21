@@ -34,8 +34,8 @@ func getFlags() []iFormatter {
 func getInputFileContent() ([]byte, error) {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := ioutil.ReadFile("D:/Projects/go-projects/src/log-formatter/t.txt")
-		//data, err := ioutil.ReadAll(os.Stdin)
+		//data, err := ioutil.ReadFile("D:/Projects/go-projects/src/log-formatter/t.txt")
+		data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}
