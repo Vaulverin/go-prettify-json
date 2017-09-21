@@ -1,2 +1,5 @@
-# go-prettify-json
-Go util for prettifying json in text (logs for example).
+# Log formatter
+Go util for formatting input log files (or other).
+
+Supported formatters:
+* json
