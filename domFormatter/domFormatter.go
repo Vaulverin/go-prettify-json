@@ -4,27 +4,26 @@ import (
 	"bytes"
 	"github.com/go-xmlfmt/xmlfmt"
 	"regexp"
-	"fmt"
 )
 
 type Formatter struct {
-	FirstDOMElement []byte
-	LastDOMElement  []byte
+	firstDOMElement []byte
+	lastDOMElement  []byte
 }
 
 /*
 
 If no begin index found, function returns -1.
 */
-func (f Formatter) FindBeginIndex(content []byte) int {
+func (f *Formatter) FindBeginIndex(content []byte) int {
 	beginIndex := -1
 	pattern, err := regexp.Compile("<[a-zA-Z]+")
 	if err == nil {
 		loc := pattern.FindIndex(content)
 		if loc != nil {
 			// Set name of the first element
-			f.FirstDOMElement = content[loc[0]:loc[1]]
-			f.LastDOMElement = append([]byte{'<', '/'}, content[loc[0]+1:loc[1]]...)
+			f.firstDOMElement = content[loc[0]:loc[1]]
+			f.lastDOMElement = append([]byte{'<', '/'}, content[loc[0]+1:loc[1]]...)
 			return loc[0]
 		}
 	}
@@ -41,10 +40,9 @@ func (f Formatter) FindEndIndex(content []byte) int {
 		if matches != nil {
 			tagCounter := 0
 			for _, match := range matches {
-				fmt.Println(string(content[match[0]:match[1]]))
-				if bytes.Equal(content[match[0]:match[1]], f.FirstDOMElement) {
+				if bytes.Equal(content[match[0]:match[1]], f.firstDOMElement) {
 					tagCounter++
-				} else if bytes.Equal(content[match[0]:match[1]], f.LastDOMElement) {
+				} else if bytes.Equal(content[match[0]:match[1]], f.lastDOMElement) {
 					tagCounter--
 				}
 				if tagCounter == 0 {

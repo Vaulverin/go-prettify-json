@@ -9,12 +9,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/go-xmlfmt/xmlfmt.git"
-  packages = ["."]
-  revision = "0315779074c2c4d1a4c459fdc5ead14f2043ffe5"
-
-[[projects]]
-  branch = "master"
   name = "github.com/yosssi/gohtml"
   packages = ["."]
   revision = "0cb98725f71a637e7bb967a8e87a1bab7ebaa6b0"
@@ -28,6 +22,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7be44f5b356666deb06837a200ed7c01b94d2086514380efd75dae70141cf9f"
+  inputs-digest = "4cb6158e2573b524b35524618f356bce4e2ddbb1ac23911f52692af2ac5587ce"
   solver-name = "gps-cdcl"
   solver-version = 1

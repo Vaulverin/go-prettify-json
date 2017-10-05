@@ -33,10 +33,10 @@ func getFormatters() []iFormatter {
 	// TODO implement flags parsing
 	return []iFormatter{
 		jsonFormatter.Formatter{},
-		htmlFormatter.Formatter{
+		&htmlFormatter.Formatter{
 					Formatter: domFormatter.Formatter{},
 				},
-		xmlFormatter.Formatter{
+		&xmlFormatter.Formatter{
 			Formatter: domFormatter.Formatter{},
 		}}
 }
@@ -45,7 +45,7 @@ func getFormatters() []iFormatter {
 func getInputFileContent() ([]byte, error) {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		data, err := ioutil.ReadFile("c://go-path/src/log-formatter/t.txt")
+		data, err := ioutil.ReadFile("d://Projects/go-projects/src/log-formatter/t.txt")
 		//data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
