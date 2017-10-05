@@ -6,18 +6,19 @@ import (
 	"io/ioutil"
 	"os"
 	"log-formatter/jsonFormatter"
+	"log-formatter/xmlFormatter"
+	"log-formatter/htmlFormatter"
+	"log-formatter/domFormatter"
 )
 
 func main() {
 	fileContent, err := getInputFileContent()
 	if err == nil {
-		// If file's content received, then we get formatters and apply each one
-		var formattedContent []byte
 		formatters := getFormatters()
 		for _, formatter := range formatters {
-			formattedContent = formatInput(fileContent, formatter)
+			fileContent = formatInput(fileContent, formatter)
 		}
-		fmt.Println(string(formattedContent))
+		fmt.Println(string(fileContent))
 	}
 }
 // Interface for all formatters
@@ -30,15 +31,22 @@ type iFormatter interface {
 // Extract formatters from terminal flags
 func getFormatters() []iFormatter {
 	// TODO implement flags parsing
-	return []iFormatter{jsonFormatter.Formatter{}}
+	return []iFormatter{
+		jsonFormatter.Formatter{},
+		htmlFormatter.Formatter{
+					Formatter: domFormatter.Formatter{},
+				},
+		xmlFormatter.Formatter{
+			Formatter: domFormatter.Formatter{},
+		}}
 }
 
 // Trying to get input file from STDin
 func getInputFileContent() ([]byte, error) {
 	stat, _ := os.Stdin.Stat()
 	if (stat.Mode() & os.ModeCharDevice) == 0 {
-		//data, err := ioutil.ReadFile("D:/Projects/go-projects/src/log-formatter/t.txt")
-		data, err := ioutil.ReadAll(os.Stdin)
+		data, err := ioutil.ReadFile("c://go-path/src/log-formatter/t.txt")
+		//data, err := ioutil.ReadAll(os.Stdin)
 		if err != nil {
 			return nil, err
 		}

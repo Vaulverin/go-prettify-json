@@ -2,15 +2,14 @@ package domFormatter
 
 import (
 	"bytes"
-	"encoding/json"
+	"github.com/go-xmlfmt/xmlfmt"
 	"regexp"
-	"go/doc"
-	"encoding/xml"
+	"fmt"
 )
 
 type Formatter struct {
-	firstDOMElement []byte
-	lastDOMElement []byte
+	FirstDOMElement []byte
+	LastDOMElement  []byte
 }
 
 /*
@@ -19,13 +18,13 @@ If no begin index found, function returns -1.
 */
 func (f Formatter) FindBeginIndex(content []byte) int {
 	beginIndex := -1
-	pattern, err := regexp.Compile("<([a-zA-Z]+)")
+	pattern, err := regexp.Compile("<[a-zA-Z]+")
 	if err == nil {
 		loc := pattern.FindIndex(content)
 		if loc != nil {
 			// Set name of the first element
-			f.firstDOMElement = content[loc[0]:loc[1]]
-			f.lastDOMElement = append([]byte {'<', '/'}, content[loc[0] + 1:loc[1]]...)
+			f.FirstDOMElement = content[loc[0]:loc[1]]
+			f.LastDOMElement = append([]byte{'<', '/'}, content[loc[0]+1:loc[1]]...)
 			return loc[0]
 		}
 	}
@@ -34,18 +33,18 @@ func (f Formatter) FindBeginIndex(content []byte) int {
 
 /*
 If no end index found, function returns -1.
- */
+*/
 func (f Formatter) FindEndIndex(content []byte) int {
-	pattern, err := regexp.Compile("<([a-zA-Z\\/]+)")
+	pattern, err := regexp.Compile("<[a-zA-Z/]+")
 	if err == nil {
-		matches := pattern.FindAllIndex(content, 0)
+		matches := pattern.FindAllIndex(content, -1)
 		if matches != nil {
 			tagCounter := 0
 			for _, match := range matches {
-				switch content[match[0]:match[1]] {
-				case f.firstDOMElement:
+				fmt.Println(string(content[match[0]:match[1]]))
+				if bytes.Equal(content[match[0]:match[1]], f.FirstDOMElement) {
 					tagCounter++
-				case f.lastDOMElement:
+				} else if bytes.Equal(content[match[0]:match[1]], f.LastDOMElement) {
 					tagCounter--
 				}
 				if tagCounter == 0 {
@@ -64,12 +63,8 @@ func (f Formatter) FindEndIndex(content []byte) int {
 }
 
 /*
-Simple JSON formatting.
-If JSON string is corrupted, function returns empty array.
+Not implemented.
 */
 func (f Formatter) Format(content []byte) []byte {
-	var data bytes.Buffer
-
-	json.Indent(&data, content, "", "  ")
-	return data.Bytes()
+	return []byte(xmlfmt.FormatXML(string(content), "\t", "  "))
 }
